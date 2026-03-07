@@ -1,9 +1,0 @@
-{
-    "game_version": "1.0-beta1",
-    "process_name": "gweled",
-    "module_name": "gweled",
-    "offsets": {
-        "score": "0xF480",
-        "current_score": "0xF4A0"
-    }
-}

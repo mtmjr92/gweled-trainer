@@ -17,14 +17,6 @@ cmake -B build && cmake --build build
 
 The binary and `config.json` will be in `build/`.
 
-### Alternative: Make (Eclipse CDT)
-
-```bash
-cd Debug
-make clean
-make
-```
-
 ## Configuration
 
 All game-specific settings are defined in `config.json`:
