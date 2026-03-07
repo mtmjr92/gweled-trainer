@@ -1,33 +1,29 @@
 #include <iostream>
-#include <sys/uio.h>
-#include <vector>
+#include <cstdlib>
+#include "process_memory.h"
+#include "gweled_hack.h"
 
-#include "globalsettings.h"
-#include "game.h"
-#include "util.h"
+int main(int argc, char* argv[]) {
+	int score = 450;
+	if (argc > 1)
+		score = std::atoi(argv[1]);
 
-using namespace std;
+	try {
+		ProcessMemory mem("gweled");
+		std::cout << "gweled PID: " << mem.pid() << std::endl;
 
-pid_t PID;
-unsigned int gi_score = 0x187E8;
-unsigned int gi_current_score = 0x18800;
-uint64_t base_address;
+		GweledHack hack(mem);
 
-int main() {
-	cout << "loading...." << endl;
+		if (hack.writeScore(score))
+			std::cout << "Score set to " << score << std::endl;
+		else
+			std::cerr << "Failed to write score" << std::endl;
 
-	PID = Util::getPID();
-	std::cout << "GWELED Process PID: " << PID << std::endl;
-
-	Game::getAddrs();
-
-	if (Game::changeScore(450))
-		std::cout << "Successfully change score!" << std::endl;
-	else
-		std::cout << "Error change score!" << std::endl;
-
-	Game::readScore();
+		std::cout << "Current score: " << hack.readScore() << std::endl;
+	} catch (const std::exception& e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+		return 1;
+	}
 
 	return 0;
 }
-

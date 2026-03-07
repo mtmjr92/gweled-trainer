@@ -2,24 +2,21 @@
 # Automatically-generated file. Do not edit!
 ################################################################################
 
-# Add inputs and outputs from these tool invocations to the build variables 
+# Add inputs and outputs from these tool invocations to the build variables
 CPP_SRCS += \
-../src/game.cpp \
+../src/gweled_hack.cpp \
 ../src/main.cpp \
-../src/mem.cpp \
-../src/util.cpp 
+../src/process_memory.cpp
 
 OBJS += \
-./src/game.o \
+./src/gweled_hack.o \
 ./src/main.o \
-./src/mem.o \
-./src/util.o 
+./src/process_memory.o
 
 CPP_DEPS += \
-./src/game.d \
+./src/gweled_hack.d \
 ./src/main.d \
-./src/mem.d \
-./src/util.d 
+./src/process_memory.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
