@@ -43,7 +43,7 @@ pid_t ProcessMemory::findPID(const std::string& process_name) {
 	throw std::runtime_error("Process not found: " + process_name);
 }
 
-uint64_t ProcessMemory::parseModuleBase(const std::string& module) {
+uint64_t ProcessMemory::parseModuleBase(const std::string& module) const {
 	std::string maps_path = "/proc/" + std::to_string(pid_) + "/maps";
 	std::ifstream maps_file(maps_path);
 	if (!maps_file.is_open())
@@ -51,7 +51,13 @@ uint64_t ProcessMemory::parseModuleBase(const std::string& module) {
 
 	std::string line;
 	while (std::getline(maps_file, line)) {
-		if (line.find(module) == std::string::npos)
+		// Match module as basename: must be preceded by '/'
+		size_t pos = line.find("/" + module);
+		if (pos == std::string::npos)
+			continue;
+		// Ensure it's the full basename (next char is whitespace, newline, or end)
+		size_t end_pos = pos + 1 + module.size();
+		if (end_pos < line.size() && line[end_pos] != ' ' && line[end_pos] != '\n')
 			continue;
 
 		std::string addr_str = line.substr(0, line.find('-'));
@@ -65,11 +71,11 @@ uint64_t ProcessMemory::parseModuleBase(const std::string& module) {
 	throw std::runtime_error("Module not found in maps: " + module);
 }
 
-uint64_t ProcessMemory::getModuleBase(const std::string& module) {
+uint64_t ProcessMemory::getModuleBase(const std::string& module) const {
 	return parseModuleBase(module);
 }
 
-bool ProcessMemory::read(uint64_t addr, void* buf, size_t size) {
+bool ProcessMemory::read(uint64_t addr, void* buf, size_t size) const {
 	if (pid_ == 0 || size == 0)
 		return false;
 
@@ -80,11 +86,13 @@ bool ProcessMemory::read(uint64_t addr, void* buf, size_t size) {
 	return n == static_cast<ssize_t>(size);
 }
 
-bool ProcessMemory::write(uint64_t addr, const void* buf, size_t size) {
+bool ProcessMemory::write(uint64_t addr, const void* buf, size_t size) const {
 	if (pid_ == 0 || size == 0)
 		return false;
 
-	iovec local{const_cast<void*>(buf), size};
+	iovec local;
+	local.iov_base = const_cast<void*>(buf);
+	local.iov_len = size;
 	iovec remote{reinterpret_cast<void*>(addr), size};
 
 	ssize_t n = process_vm_writev(pid_, &local, 1, &remote, 1, 0);

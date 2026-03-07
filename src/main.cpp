@@ -1,6 +1,6 @@
 #include <iostream>
-#include <cstdlib>
 #include <cstring>
+#include <cerrno>
 #include "config.h"
 #include "process_memory.h"
 #include "gweled_hack.h"
@@ -29,7 +29,14 @@ int main(int argc, char* argv[]) {
 			}
 			config_path = argv[++i];
 		} else {
-			score = std::atoi(argv[i]);
+			char* end;
+			errno = 0;
+			long val = std::strtol(argv[i], &end, 10);
+			if (*end != '\0' || errno != 0) {
+				std::cerr << "Error: invalid score value: " << argv[i] << "\n";
+				return 1;
+			}
+			score = static_cast<int>(val);
 		}
 	}
 

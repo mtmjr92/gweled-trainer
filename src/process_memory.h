@@ -13,12 +13,12 @@ public:
 	explicit ProcessMemory(const std::string& process_name);
 
 	pid_t pid() const { return pid_; }
-	uint64_t getModuleBase(const std::string& module);
-	bool read(uint64_t addr, void* buf, size_t size);
-	bool write(uint64_t addr, const void* buf, size_t size);
+	uint64_t getModuleBase(const std::string& module) const;
+	bool read(uint64_t addr, void* buf, size_t size) const;
+	bool write(uint64_t addr, const void* buf, size_t size) const;
 
 	template <typename T>
-	T readValue(uint64_t addr) {
+	T readValue(uint64_t addr) const {
 		T val{};
 		if (!read(addr, &val, sizeof(T)))
 			throw std::runtime_error("Failed to read from address");
@@ -26,13 +26,13 @@ public:
 	}
 
 	template <typename T>
-	bool writeValue(uint64_t addr, T val) {
+	bool writeValue(uint64_t addr, T val) const {
 		return write(addr, &val, sizeof(T));
 	}
 
 private:
 	static pid_t findPID(const std::string& process_name);
-	uint64_t parseModuleBase(const std::string& module);
+	uint64_t parseModuleBase(const std::string& module) const;
 
 	pid_t pid_;
 };

@@ -12,11 +12,11 @@ public:
 	GweledHack(ProcessMemory& mem, const Config& config);
 
 	uint64_t baseAddress() const { return base_; }
-	int readScore();
-	bool writeScore(int score);
+	int readScore() const;
+	bool writeScore(int score) const;
 
 private:
-	ProcessMemory& mem_;
+	const ProcessMemory& mem_;
 	uint64_t base_;
 	uint64_t score_offset_;
 	uint64_t current_score_offset_;

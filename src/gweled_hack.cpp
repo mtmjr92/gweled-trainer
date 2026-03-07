@@ -8,11 +8,11 @@ GweledHack::GweledHack(ProcessMemory& mem, const Config& config)
 	  score_offset_(config.score_offset),
 	  current_score_offset_(config.current_score_offset) {}
 
-int GweledHack::readScore() {
+int GweledHack::readScore() const {
 	return mem_.readValue<int>(base_ + score_offset_);
 }
 
-bool GweledHack::writeScore(int score) {
+bool GweledHack::writeScore(int score) const {
 	bool ok = mem_.writeValue<int>(base_ + score_offset_, score);
 	ok &= mem_.writeValue<int>(base_ + current_score_offset_, score);
 	return ok;
