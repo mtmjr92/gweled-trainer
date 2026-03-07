@@ -5,25 +5,23 @@ External memory hack for [Gweled](https://en.wikipedia.org/wiki/Gweled) (Bejewel
 ## Requirements
 
 - Linux (uses `process_vm_readv` / `process_vm_writev`)
-- g++ with C++11 or later
+- CMake 3.10+ and a C++11 compiler (e.g. g++)
 - Root privileges or `CAP_SYS_PTRACE` capability
 - Gweled installed and running
 
 ## Build
 
-### Make (Eclipse CDT)
+```bash
+cmake -B build && cmake --build build
+```
+
+The binary and `config.json` will be in `build/`.
+
+### Alternative: Make (Eclipse CDT)
 
 ```bash
 cd Debug
 make clean
-make
-```
-
-### CMake
-
-```bash
-mkdir build && cd build
-cmake ..
 make
 ```
 
@@ -55,27 +53,25 @@ Offsets can be changed without recompiling.
 
 ## Usage
 
-Run from the **project root** (where `config.json` is located):
-
 ```bash
 # Set score to 450 (default)
-sudo ./Debug/gweled-hack
+sudo ./build/gweled-hack
 
 # Set score to a custom value
-sudo ./Debug/gweled-hack 9999
+sudo ./build/gweled-hack 9999
 
 # Use a different config file
-sudo ./Debug/gweled-hack -c myconfig.json 9999
+sudo ./build/gweled-hack -c myconfig.json 9999
 
 # Show help
-./Debug/gweled-hack -h
+./build/gweled-hack -h
 ```
 
-If running from the `Debug/` directory, specify the config path:
+`config.json` is automatically copied to the build directory, so you can also run directly from there:
 
 ```bash
-cd Debug
-sudo ./gweled-hack -c ../config.json
+cd build
+sudo ./gweled-hack
 ```
 
 ## Project Structure
@@ -84,9 +80,6 @@ sudo ./gweled-hack -c ../config.json
 gweled-hack/
 ├── config.json               # Game offsets and process configuration
 ├── CMakeLists.txt            # CMake build
-├── Debug/                    # Eclipse CDT build
-│   ├── makefile
-│   └── src/subdir.mk
 └── src/
     ├── main.cpp              # Entry point, CLI parsing
     ├── config.h/cpp          # JSON config loader
