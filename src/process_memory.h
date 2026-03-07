@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <sys/types.h>
 
+namespace gwl {
+
 class ProcessMemory {
 public:
 	explicit ProcessMemory(const std::string& process_name);
@@ -34,5 +36,7 @@ private:
 
 	pid_t pid_;
 };
+
+} // namespace gwl
 
 #endif

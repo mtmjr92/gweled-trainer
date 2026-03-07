@@ -34,6 +34,7 @@
 # Build output
 Debug/gweled-hack
 Debug/gweled
+build/
 
 # IDE
 .idea/

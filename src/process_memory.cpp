@@ -6,6 +6,8 @@
 #include <cstring>
 #include <dirent.h>
 
+namespace gwl {
+
 ProcessMemory::ProcessMemory(const std::string& process_name)
 	: pid_(findPID(process_name)) {}
 
@@ -16,7 +18,6 @@ pid_t ProcessMemory::findPID(const std::string& process_name) {
 
 	struct dirent* entry;
 	while ((entry = readdir(dir)) != nullptr) {
-		// Skip non-numeric entries
 		if (entry->d_type != DT_DIR)
 			continue;
 
@@ -25,7 +26,6 @@ pid_t ProcessMemory::findPID(const std::string& process_name) {
 		if (*end != '\0')
 			continue;
 
-		// Read /proc/<pid>/comm
 		std::string comm_path = "/proc/" + std::string(entry->d_name) + "/comm";
 		std::ifstream comm_file(comm_path);
 		if (!comm_file.is_open())
@@ -54,7 +54,6 @@ uint64_t ProcessMemory::parseModuleBase(const std::string& module) {
 		if (line.find(module) == std::string::npos)
 			continue;
 
-		// Line format: "start-end perms offset dev inode pathname"
 		std::string addr_str = line.substr(0, line.find('-'));
 		uint64_t addr;
 		std::stringstream ss;
@@ -91,3 +90,5 @@ bool ProcessMemory::write(uint64_t addr, const void* buf, size_t size) {
 	ssize_t n = process_vm_writev(pid_, &local, 1, &remote, 1, 0);
 	return n == static_cast<ssize_t>(size);
 }
+
+} // namespace gwl
