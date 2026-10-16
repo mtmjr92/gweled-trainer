@@ -1,21 +1,43 @@
 #include <iostream>
 #include <cstring>
 #include <cerrno>
+#include <cstdlib>
 #include "config.h"
-#include "process_memory.h"
-#include "gweled_hack.h"
+#include "feature.h"
+#include "trainer.h"
+#include "tui.h"
 
 static void printUsage(const char* program) {
 	std::cout << "Usage: " << program << " [options] [score]\n"
 	          << "Options:\n"
 	          << "  -c <path>   Config file path (default: config.json)\n"
 	          << "  -h          Show this help\n"
-	          << "\nScore defaults to 450 if not specified.\n";
+	          << "\nWithout a score, opens the interactive trainer menu.\n"
+	          << "With a score, sets it once and exits.\n"
+	          << "\nSupports Gweled 1.0-beta1 only (checked against game_version in the config).\n"
+	          << "Requires root (sudo) or the CAP_SYS_PTRACE capability.\n";
+}
+
+// Non-interactive mode: set the score once and exit.
+static int setScoreOnce(gwl::Trainer& trainer, int score) {
+	trainer.attach();
+	std::cout << "Game version: " << trainer.config().game_version << std::endl;
+	std::cout << trainer.config().process_name << " PID: " << trainer.pid() << std::endl;
+	std::cout << "Base @ 0x" << std::hex << trainer.baseAddress() << std::dec << std::endl;
+
+	if (!trainer.writeScore(score)) {
+		std::cerr << "Failed to write score" << std::endl;
+		return 1;
+	}
+	std::cout << "Score set to " << score << std::endl;
+	std::cout << "Current score: " << trainer.readScore() << std::endl;
+	return 0;
 }
 
 int main(int argc, char* argv[]) {
 	std::string config_path = "config.json";
-	int score = 450;
+	bool has_score = false;
+	int score = 0;
 
 	for (int i = 1; i < argc; ++i) {
 		if (std::strcmp(argv[i], "-h") == 0) {
@@ -37,25 +59,17 @@ int main(int argc, char* argv[]) {
 				return 1;
 			}
 			score = static_cast<int>(val);
+			has_score = true;
 		}
 	}
 
 	try {
-		gwl::Config config = gwl::Config::loadFromFile(config_path);
-		std::cout << "Game version: " << config.game_version << std::endl;
+		gwl::Trainer trainer(gwl::Config::loadFromFile(config_path));
+		if (has_score)
+			return setScoreOnce(trainer, score);
 
-		gwl::ProcessMemory mem(config.process_name);
-		std::cout << config.process_name << " PID: " << mem.pid() << std::endl;
-
-		gwl::GweledHack hack(mem, config);
-		std::cout << "Base @ 0x" << std::hex << hack.baseAddress() << std::dec << std::endl;
-
-		if (hack.writeScore(score))
-			std::cout << "Score set to " << score << std::endl;
-		else
-			std::cerr << "Failed to write score" << std::endl;
-
-		std::cout << "Current score: " << hack.readScore() << std::endl;
+		gwl::Features features = gwl::makeFeatures();
+		gwl::runTui(trainer, features);
 	} catch (const std::exception& e) {
 		std::cerr << "Error: " << e.what() << std::endl;
 		return 1;

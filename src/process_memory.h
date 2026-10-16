@@ -8,6 +8,13 @@
 
 namespace gwl {
 
+// Thrown when the kernel denies access to another process's memory
+// (not root, no CAP_SYS_PTRACE, or blocked by Yama ptrace_scope).
+class PermissionError : public std::runtime_error {
+public:
+	using std::runtime_error::runtime_error;
+};
+
 class ProcessMemory {
 public:
 	explicit ProcessMemory(const std::string& process_name);
